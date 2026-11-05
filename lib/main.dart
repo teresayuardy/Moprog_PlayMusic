@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
       listenable: appState,
       builder: (context, _) => MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Pemutar Lagu',
+        title: 'Aplikasi Pemutar Lagu',
         theme: buildTheme(dark: false),
         darkTheme: buildTheme(dark: true),
         themeMode: appState.isDark ? ThemeMode.dark : ThemeMode.light,
