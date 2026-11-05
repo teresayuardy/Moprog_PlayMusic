@@ -4,8 +4,8 @@ import '../screens/detail_page.dart';
 import '../state/app_state.dart';
 import 'playlist_sheet.dart';
 
-// Satu baris lagu yang dipakai di semua halaman (tidak ada duplikasi).
-// Gesture: tap = play/pause, double tap = favorit, long press = detail.
+// Satu baris lagu yang dipakai di semua halaman (tidak ada duplikasi)
+// Gesture: tap = play/pause lagu, double tap = tambah lagu ke favorit, long press = detail lagu
 class SongTile extends StatelessWidget {
   final Song song;
   const SongTile({super.key, required this.song});
@@ -18,10 +18,10 @@ class SongTile extends StatelessWidget {
         final aktif = appState.isCurrent(song);
         return GestureDetector(
           onTap: () async {
-            final ok = await appState.togglePlay(song);
-            if (!ok && context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Preview tidak tersedia')));
+            final pesan = await appState.togglePlay(song);
+            if (pesan != null && context.mounted) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(pesan)));
             }
           },
           onDoubleTap: () => appState.toggleFavorite(song),
@@ -41,7 +41,7 @@ class SongTile extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (appState.isFavorite(song))
-                  const Icon(Icons.favorite, color: Color(0xFFD81B60), size: 20),
+                  const Icon(Icons.favorite, color: Color(0xFFEC407A), size: 20),
                 if (aktif)
                   Icon(appState.isPlaying ? Icons.pause : Icons.play_arrow),
                 IconButton(

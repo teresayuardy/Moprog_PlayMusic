@@ -12,6 +12,7 @@ class AppState extends ChangeNotifier {
   bool isPlaying = false;
   List<Song> favorites = [];
   Map<String, List<Song>> playlists = {};
+  bool isDark = false; // mode tema gelap
 
   AppState() {
     // Reset status saat preview selesai
@@ -27,6 +28,7 @@ class AppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final fav = prefs.getString('favorites');
     final pl = prefs.getString('playlists');
+    isDark = prefs.getBool('isDark') ?? false;
     if (fav != null) {
       favorites = (jsonDecode(fav) as List).map((e) => Song.fromJson(e)).toList();
     }
@@ -50,20 +52,35 @@ class AppState extends ChangeNotifier {
 
   bool isCurrent(Song s) => current?.id == s.id;
 
-  // Play / pause
-  // Mengembalikan false jika lagu tidak punya preview
-  Future<bool> togglePlay(Song song) async {
-    if (song.previewUrl == null) return false;
-    if (isCurrent(song)) {
-      isPlaying ? await player.pause() : await player.resume();
-      isPlaying = !isPlaying;
-    } else {
-      await player.play(UrlSource(song.previewUrl!));
-      current = song;
-      isPlaying = true;
+  // Play / pause, mengembalikan null jika berhasil, atau pesan error jika gagal
+  Future<String?> togglePlay(Song song) async {
+    if (song.previewUrl == null) return 'Preview tidak tersedia';
+    try {
+      if (isCurrent(song)) {
+        isPlaying ? await player.pause() : await player.resume();
+        isPlaying = !isPlaying;
+      } else {
+        await player.play(UrlSource(song.previewUrl!));
+        current = song;
+        isPlaying = true;
+      }
+      notifyListeners();
+      return null;
+    } catch (e) {
+      // Mencegah crash jika koneksi putus atau audio gagal dimuat
+      isPlaying = false;
+      current = null;
+      notifyListeners();
+      return 'Gagal memutar lagu. Periksa koneksi internetmu.';
     }
+  }
+
+  // Ganti tema light / dark dan simpan pilihannya
+  Future<void> toggleDark() async {
+    isDark = !isDark;
     notifyListeners();
-    return true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDark', isDark);
   }
 
   bool isFavorite(Song s) => favorites.any((f) => f.id == s.id);
@@ -74,7 +91,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Membuat playlist baru (false jika nama kosong / sudah ada)
+  // Membuat playlist baru, false jika nama kosong / sudah ada
   bool createPlaylist(String name) {
     name = name.trim();
     if (name.isEmpty || playlists.containsKey(name)) return false;
@@ -84,7 +101,7 @@ class AppState extends ChangeNotifier {
     return true;
   }
 
-  // Menambah lagu ke playlist (false jika lagu sudah ada di dalamnya)
+  // Menambah lagu ke playlist, false jika lagu sudah ada di dalamnya
   bool addToPlaylist(String name, Song s) {
     final list = playlists[name]!;
     if (list.any((e) => e.id == s.id)) return false;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/song.dart';
 import '../services/itunes_service.dart';
+import '../state/app_state.dart';
 import '../widgets/song_tile.dart';
 
 // Tab Cari: pencarian lagu dengan loading, error, hasil kosong, dan pull-to-refresh
@@ -53,7 +54,19 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cari Lagu')),
+      appBar: AppBar(
+        title: const Text('Cari Lagu'),
+        actions: [
+          // Tombol ganti tema light / dark
+          ListenableBuilder(
+            listenable: appState,
+            builder: (_, __) => IconButton(
+              icon: Icon(appState.isDark ? Icons.light_mode : Icons.dark_mode),
+              onPressed: appState.toggleDark,
+            ),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -69,12 +82,12 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
             if (songs.isNotEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
                   'Ketuk sekali untuk play/pause • Ketuk dua kali untuk favorit • Tekan lama untuk melihat detail lagu',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).hintColor),
                 ),
               ),
             Expanded(

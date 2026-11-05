@@ -6,43 +6,61 @@ import 'state/app_state.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await appState.load(); // muat favorit & playlist tersimpan
+  await appState.load(); // muat favorit, playlist, dan pilihan tema
   runApp(const MyApp());
 }
 
-// Root aplikasi: tema soft pink dengan teks hitam.
+// Membuat tema soft pink. [dark] = true untuk versi gelap (rose gelap)
+ThemeData buildTheme({required bool dark}) {
+  const pink = Color(0xFFF8BBD0);
+  final bar = dark ? const Color(0xFF3B1F2B) : pink;
+  final onBar = dark ? Colors.white : Colors.black;
+  final base = dark ? ThemeData.dark() : ThemeData.light();
+
+  return ThemeData(
+    brightness: dark ? Brightness.dark : Brightness.light,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: pink,
+      brightness: dark ? Brightness.dark : Brightness.light,
+      primary: pink,
+      onPrimary: Colors.black,
+    ),
+    scaffoldBackgroundColor:
+    dark ? const Color(0xFF1A1216) : const Color(0xFFFFF5F8),
+    appBarTheme: AppBarTheme(backgroundColor: bar, foregroundColor: onBar),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: bar,
+      indicatorColor: dark ? const Color(0xFF6D3348) : Colors.white70,
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: pink,
+      foregroundColor: Colors.black,
+    ),
+    textTheme: base.textTheme.apply(bodyColor: onBar, displayColor: onBar),
+  );
+}
+
+// Root aplikasi: tema mengikuti pilihan terang / gelap di AppState
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const pink = Color(0xFFF8BBD0);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Aplikasi Pemutar Lagu',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: pink, primary: pink, onPrimary: Colors.black),
-        scaffoldBackgroundColor: const Color(0xFFFFF5F8),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: pink,
-          foregroundColor: Colors.black,
-        ),
-        navigationBarTheme: const NavigationBarThemeData(
-          backgroundColor: pink,
-          indicatorColor: Colors.white70,
-        ),
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: pink,
-          foregroundColor: Colors.black,
-        ),
-        textTheme: ThemeData.light().textTheme.apply(bodyColor: Colors.black, displayColor: Colors.black),
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (context, _) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Pemutar Lagu',
+        theme: buildTheme(dark: false),
+        darkTheme: buildTheme(dark: true),
+        themeMode: appState.isDark ? ThemeMode.dark : ThemeMode.light,
+        home: const HomeShell(),
       ),
-      home: const HomeShell(),
     );
   }
 }
 
-// Kerangka dengan bottom navigation: Cari, Favorit, Playlist.
+// Kerangka dengan bottom navigation: Cari, Favorit, Playlist
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 

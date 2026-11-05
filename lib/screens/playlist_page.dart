@@ -3,7 +3,7 @@ import '../state/app_state.dart';
 import '../widgets/playlist_sheet.dart';
 import 'playlist_detail_page.dart';
 
-// Tab Playlist: daftar playlist milik user, tekan lama untuk menghapus
+// Tab Playlist: daftar playlist milik user, tekan lama untuk menghapus playlist
 class PlaylistPage extends StatelessWidget {
   const PlaylistPage({super.key});
 
@@ -52,11 +52,11 @@ class PlaylistPage extends StatelessWidget {
           return Column(
             children: [
               // Petunjuk gesture, hanya muncul kalau sudah ada playlist
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  'Ketuk sekali untuk membuka playlist • Tekan lama untuk menghapus playlist',
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                  'Ketuk untuk membuka • Tekan lama untuk menghapus',
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).hintColor),
                 ),
               ),
               Expanded(
